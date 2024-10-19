@@ -2793,6 +2793,7 @@ name = "restaking"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "borsh 1.5.1",
  "serde",
  "solana-sdk",
  "spl-associated-token-account 5.0.1",

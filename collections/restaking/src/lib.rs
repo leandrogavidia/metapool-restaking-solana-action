@@ -1,18 +1,21 @@
 use errors::ActionError;
-use solana_sdk::{ pubkey, pubkey::Pubkey, message::Message, transaction::Transaction };
+use solana_sdk::{ native_token::LAMPORTS_PER_SOL, pubkey::Pubkey, message::Message, transaction::Transaction };
 use spl_token::ID as TOKEN_PROGRAM_ID;
-use spl_associated_token_account::instruction::create_associated_token_account_idempotent;
+use spl_associated_token_account::{ instruction::create_associated_token_account_idempotent, get_associated_token_address };
 use std::str::FromStr;
+use consts::{ MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS };
+use instructions::{ deposit_transaction, restake_ix };
+
 use znap::prelude::*;
 
 mod errors;
-
-const MPSOL_MINT_ADDRESS: Pubkey = pubkey!("mPsoLV53uAGXnPJw63W91t2VDqCVZcU5rTh3PWzxnLr");
-const MSOL_MINT_ADDRESS: Pubkey = pubkey!("mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So");
+mod instructions;
+mod consts;
 
 #[collection]
 pub mod restaking {
 
+    use solana_sdk;
 
     use super::*;
 
@@ -20,21 +23,41 @@ pub mod restaking {
         let account_pubkey = Pubkey::from_str(&ctx.payload.account)
             .or_else(|_| Err(Error::from(ActionError::InvalidAccountPubkey)))?;
     
-        let create_mpsol_ata_instruction = create_associated_token_account_idempotent(
-            &account_pubkey,
-            &account_pubkey,
-            &MPSOL_MINT_ADDRESS,
-            &TOKEN_PROGRAM_ID,
-        );
-
-        let create_msol_ata_instruction = create_associated_token_account_idempotent(
+        let create_msol_ata_ix = create_associated_token_account_idempotent(
             &account_pubkey,
             &account_pubkey,
             &MSOL_MINT_ADDRESS,
             &TOKEN_PROGRAM_ID,
         );
 
-        let message = Message::new(&[], None);
+        let create_mpsol_ata_ix = create_associated_token_account_idempotent(
+            &account_pubkey,
+            &account_pubkey,
+            &MPSOL_MINT_ADDRESS,
+            &TOKEN_PROGRAM_ID,
+        );
+
+        let msol_ata =
+            get_associated_token_address(&account_pubkey, &MSOL_MINT_ADDRESS);
+        
+        let mpsol_ata =
+            get_associated_token_address(&account_pubkey, &MPSOL_MINT_ADDRESS);
+
+        let amount = (ctx.query.amount * (LAMPORTS_PER_SOL as f32)) as u64;
+        let lst_amount = ((ctx.query.amount * 0.2) * (LAMPORTS_PER_SOL as f32)) as u64;
+
+        let deposit_ix = deposit_transaction(amount, account_pubkey, msol_ata);
+        let stake_ix = restake_ix(
+            lst_amount,
+            2,
+            account_pubkey,
+            msol_ata,
+            mpsol_ata
+        );
+
+        let instructions = vec![create_msol_ata_ix, create_mpsol_ata_ix, deposit_ix, stake_ix];
+
+        let message = Message::new(&instructions, None);
         let transaction = Transaction::new_unsigned(message);
 
         Ok(ActionTransaction {
@@ -55,11 +78,11 @@ pub mod restaking {
         href = "/api/restaking?amount={amount}&method=restake",
         parameter = { label = "Amount", name = "amount"  }
     },
-    link = {
-        label = "Unrestake",
-        href = "/api/restaking?amount={amount}&method=unrestake",
-        parameter = { label = "Amount", name = "amount"  }
-    }
+    // link = {
+    //     label = "Unrestake",
+    //     href = "/api/restaking?amount={amount}&method=unrestake",
+    //     parameter = { label = "Amount", name = "amount"  }
+    // }
 )]
 #[query(amount: f32, method: String)]
 pub struct RestakingAction;
