@@ -62,11 +62,7 @@ pub async fn get_token_account_balance(pubkey: &Pubkey, rpc: &str) -> Result<f32
             .json::<Value>()
             .await
             .or_else(|_| Err(Error::from(ActionError::ParsingHeliusResponse)))?;
-        let amount = res_json["result"]["value"]["uiAmount"]
-            .as_str()
-            .unwrap()
-            .parse::<f32>()
-            .unwrap();
+        let amount = res_json["result"]["value"]["uiAmount"].as_f64().unwrap() as f32;
         Ok(amount)
     } else {
         Err(Error::from(ActionError::ServerError))

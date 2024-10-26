@@ -2970,9 +2970,11 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "borsh 1.5.1",
+ "chrono",
  "reqwest 0.12.8",
  "serde",
  "serde_json",
+ "solana-client",
  "solana-sdk",
  "spl-associated-token-account 5.0.1",
  "spl-token",
