@@ -118,7 +118,7 @@ pub mod restaking {
     label = "Restake",
     link = {
         label = "Restake",
-        href = "/api/restaking?amount={amount}&token={token}&method={restake}",
+        href = "/api/restaking?amount={amount}&token={token}&method={method}",
         parameter = { 
             label = "Token", 
             name = "token", 
