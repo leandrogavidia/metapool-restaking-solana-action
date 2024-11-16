@@ -1,4 +1,4 @@
-use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS};
+use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS, BSOL_MINT_ADDRESS};
 use errors::ActionError;
 use instructions::{deposit_transaction_msol, restake_ix, unrestake_ix};
 use serde::Serialize;
@@ -61,7 +61,7 @@ pub mod restaking {
                 } else {
                     let lst_amount = ((ctx.query.amount * 0.2) * (LAMPORTS_PER_SOL as f32)) as u64;
                     let deposit_ix = deposit_transaction_msol(amount, account_pubkey, msol_ata);
-                    let stake_ix = restake_ix(lst_amount, 2, account_pubkey, msol_ata, mpsol_ata);
+                    let stake_ix = restake_ix(lst_amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
     
                     instructions.extend_from_slice(&[
                         create_msol_ata_ix,
@@ -77,8 +77,21 @@ pub mod restaking {
                 if current_lst_amount < ctx.query.amount {
                     return Err(Error::from(ActionError::InsufficientFunds));
                 } else {
-                    let stake_ix = restake_ix(amount, 2, account_pubkey, msol_ata, mpsol_ata);
+                    let stake_ix = restake_ix(amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
 
+                    instructions.extend_from_slice(&[
+                        create_mpsol_ata_ix,
+                        stake_ix,
+                    ]);
+                }
+            } else if token == "bsol" {
+                let bsol_ata = get_associated_token_address(&account_pubkey, &BSOL_MINT_ADDRESS);
+                let current_lst_amount = get_token_account_balance(&bsol_ata, &rpc).await?;
+
+                if current_lst_amount < ctx.query.amount {
+                    return Err(Error::from(ActionError::InsufficientFunds));
+                } else {
+                    let stake_ix = restake_ix(amount, 2, account_pubkey, bsol_ata, mpsol_ata, &token);
                     instructions.extend_from_slice(&[
                         create_mpsol_ata_ix,
                         stake_ix,
@@ -131,10 +144,10 @@ pub mod restaking {
                 label = "mSOL",
                 value = "msol"
             },
-            // option = {
-            //     label = "BSOL",
-            //     value = "bsol"
-            // },
+            option = {
+                label = "BSOL",
+                value = "bsol"
+            },
             // option = {
             //     label = "JitoSOL",
             //     value = "jitosol"
