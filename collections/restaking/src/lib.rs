@@ -108,7 +108,7 @@ pub mod restaking {
         parameter = { 
             label = "Token", 
             name = "token", 
-            type = "radio", 
+            type = "select", 
             option = {
                 label = "SOL",
                 value = "sol"
