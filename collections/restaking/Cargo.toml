@@ -14,4 +14,4 @@ solana-client = "2.0.14"
 solana-sdk = "2.0.14"
 spl-associated-token-account = "5.0.1"
 spl-token = "6.0.0"
-znap = "0.1.37"
+znap = { git = "https://github.com/leandrogavidia/znap.git", branch = "advanced-input-types" }
