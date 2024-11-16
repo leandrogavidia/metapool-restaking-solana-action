@@ -135,6 +135,7 @@ pub mod restaking {
         parameter = { 
             label = "Token", 
             name = "token", 
+            required = true,
             type = "select", 
             option = {
                 label = "SOL",
@@ -156,6 +157,7 @@ pub mod restaking {
         parameter = { 
             label = "Method", 
             name = "method", 
+            required = true,
             type = "radio", 
             option = {
                 label = "Restake",
@@ -165,7 +167,8 @@ pub mod restaking {
         parameter = { 
             label = "Amount", 
             name = "amount", 
-            type = "number"  
+            required = true,
+            type = "number", 
         }
     },
 )]
