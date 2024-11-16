@@ -3,7 +3,7 @@ use crate::consts::{
     MARINADE_MSOL_LEG_ACCOUNT, MARINADE_MSOL_LEG_AUTHORITY, MARINADE_MSOL_MINT_AUTHORITY,
     MARINADE_RESERVE_SOL_PDA, MARINADE_SOL_LEG_ACCOUNT, MPSOL_MINT_ADDRESS, MPSOL_MINT_AUTHORITY,
     MP_RESTAKIN_PROGRAM, MSOL_MINT_ADDRESS, STAKE_DISCRIMINATOR, UNSTAKE_DISCRIMINATOR,
-    VAULT_ATA_PDA_AUTH, VAULT_LST_ACCOUNT, VAULT_STATE,
+    VAULT_ATA_PDA_AUTH, VAULT_LST_ACCOUNT, VAULT_STATE, REFERRAL_STATE, MSOL_TOKEN_PARTNER_ACCOUNT
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::prelude::*;
@@ -17,7 +17,7 @@ use solana_sdk::{
 };
 use spl_token::ID as TOKEN_PROGRAM_PUBKEY;
 
-pub fn deposit_transaction(lamports: u64, from_pubkey: Pubkey, msol_ata: Pubkey) -> Instruction {
+pub fn deposit_transaction_msol(lamports: u64, from_pubkey: Pubkey, msol_ata: Pubkey) -> Instruction {
     let args = DepositInstructionArgs { lamports };
 
     let accounts = vec![

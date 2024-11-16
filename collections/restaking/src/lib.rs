@@ -1,6 +1,6 @@
 use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS};
 use errors::ActionError;
-use instructions::{deposit_transaction, restake_ix, unrestake_ix};
+use instructions::{deposit_transaction_msol, restake_ix, unrestake_ix};
 use serde::Serialize;
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::{
@@ -60,13 +60,27 @@ pub mod restaking {
                     return Err(Error::from(ActionError::InsufficientFunds));
                 } else {
                     let lst_amount = ((ctx.query.amount * 0.2) * (LAMPORTS_PER_SOL as f32)) as u64;
-                    let deposit_ix = deposit_transaction(amount, account_pubkey, msol_ata);
+                    let deposit_ix = deposit_transaction_msol(amount, account_pubkey, msol_ata);
                     let stake_ix = restake_ix(lst_amount, 2, account_pubkey, msol_ata, mpsol_ata);
     
                     instructions.extend_from_slice(&[
                         create_msol_ata_ix,
                         create_mpsol_ata_ix,
                         deposit_ix,
+                        stake_ix,
+                    ]);
+                }
+            } else if token == "msol" {
+                let msol_ata = get_associated_token_address(&account_pubkey, &MSOL_MINT_ADDRESS);
+                let current_lst_amount = get_token_account_balance(&msol_ata, &rpc).await?;
+
+                if current_lst_amount < ctx.query.amount {
+                    return Err(Error::from(ActionError::InsufficientFunds));
+                } else {
+                    let stake_ix = restake_ix(amount, 2, account_pubkey, msol_ata, mpsol_ata);
+
+                    instructions.extend_from_slice(&[
+                        create_mpsol_ata_ix,
                         stake_ix,
                     ]);
                 }
@@ -100,7 +114,7 @@ pub mod restaking {
 #[action(
     icon = "https://raw.githubusercontent.com/leandrogavidia/files/refs/heads/main/metapool-restaking.png",
     title = "Restake Aggregator",
-    description = "Solana Restake Aggregator. To restake your LST tokens in Solana, such as mSOL, jitoSOL, bSOL, and receive mpSOL.\n\n* Unrestake note: Funds will be available in approximately 10 days.",
+    description = "Solana Restake Aggregator. To restake your LST tokens in Solana, such as mSOL, jitoSOL, bSOL, and receive mpSOL.",
     label = "Restake",
     link = {
         label = "Restake",
@@ -117,14 +131,14 @@ pub mod restaking {
                 label = "mSOL",
                 value = "msol"
             },
-            option = {
-                label = "BSOL",
-                value = "bsol"
-            },
-            option = {
-                label = "JitoSOL",
-                value = "jitosol"
-            }
+            // option = {
+            //     label = "BSOL",
+            //     value = "bsol"
+            // },
+            // option = {
+            //     label = "JitoSOL",
+            //     value = "jitosol"
+            // }
         },
         parameter = { 
             label = "Method", 
