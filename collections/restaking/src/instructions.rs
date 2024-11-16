@@ -81,9 +81,9 @@ pub fn restake_ix(
     };
 
     let lst_pool = match token {
-        "sol" | "msol" => MSOL_VAULT_LST_ACCOUNT,
+        "sol" | "msol" => MARINADE_LIQUID_STAKING_STATE,
         "bsol" => BLAZE_STAKE_POOL,
-        _ => MSOL_VAULT_LST_ACCOUNT
+        _ => MARINADE_LIQUID_STAKING_STATE
     };
 
     let accounts = vec![
