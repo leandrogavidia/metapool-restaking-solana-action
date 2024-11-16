@@ -2,6 +2,7 @@ use solana_sdk::{pubkey, pubkey::Pubkey};
 
 pub const DEPOSIT_DISCRIMINATOR: [u8; 8] = [242, 35, 198, 137, 82, 225, 242, 182];
 pub const STAKE_DISCRIMINATOR: [u8; 8] = [206, 176, 202, 18, 200, 209, 179, 108];
+pub const UNSTAKE_DISCRIMINATOR: [u8; 8] = [90, 95, 107, 42, 205, 124, 50, 225];
 
 // Mariande staking referral program
 
