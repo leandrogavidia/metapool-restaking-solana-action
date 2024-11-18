@@ -12,4 +12,6 @@ pub enum ActionError {
     ParsingHeliusResponse,
     #[error(msg  = "ServerError")]
     ServerError,
+    #[error(msg  = "Method is not valid")]
+    InvalidMethod,
 }

@@ -3,22 +3,17 @@ use crate::consts::{
     MARINADE_FINANCE_PROGRAM, MARINADE_LIQUID_STAKING_STATE, MARINADE_MSOL_LEG_ACCOUNT,
     MARINADE_MSOL_LEG_AUTHORITY, MARINADE_MSOL_MINT_AUTHORITY, MARINADE_RESERVE_SOL_PDA,
     MARINADE_SOL_LEG_ACCOUNT, MPSOL_MINT_ADDRESS, MPSOL_MINT_AUTHORITY, MP_RESTAKIN_PROGRAM,
-    MSOL_MINT_ADDRESS, MSOL_TOKEN_PARTNER_ACCOUNT, MSOL_VAULT_LST_ACCOUNT, MSOL_VAULT_STATE,
-    REFERRAL_STATE, STAKE_DISCRIMINATOR, UNSTAKE_DISCRIMINATOR, VAULT_ATA_PDA_AUTH, BLAZE_STAKE_POOL
+    MSOL_MINT_ADDRESS, MSOL_VAULT_LST_ACCOUNT, MSOL_VAULT_STATE, STAKE_DISCRIMINATOR, VAULT_ATA_PDA_AUTH, BLAZE_STAKE_POOL
 };
 use borsh::{BorshDeserialize, BorshSerialize};
-use chrono::prelude::*;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
-    pubkey,
     pubkey::Pubkey,
-    signature::Keypair,
-    signer::Signer,
     system_program::ID as SYSTEM_PROGRAM_PUBKEY,
 };
 use spl_token::ID as TOKEN_PROGRAM_PUBKEY;
 
-pub fn deposit_transaction_msol(
+pub fn deposit_ix(
     lamports: u64,
     from_pubkey: Pubkey,
     msol_ata: Pubkey,
@@ -37,6 +32,9 @@ pub fn deposit_transaction_msol(
         AccountMeta::new_readonly(MARINADE_MSOL_MINT_AUTHORITY, false),
         AccountMeta::new_readonly(SYSTEM_PROGRAM_PUBKEY, false),
         AccountMeta::new_readonly(TOKEN_PROGRAM_PUBKEY, false),
+
+        // These 3 accounts are commented on because there is an overflow in the transaction weight allowed. It will be patched eventually.
+
         // AccountMeta::new_readonly(MARINADE_FINANCE_PROGRAM, false),
         // AccountMeta::new(REFERRAL_STATE, false),
         // AccountMeta::new(MSOL_TOKEN_PARTNER_ACCOUNT, false),
@@ -102,69 +100,6 @@ pub fn restake_ix(
     ];
 
     Instruction::new_with_borsh(MP_RESTAKIN_PROGRAM, &(STAKE_DISCRIMINATOR, args), accounts)
-}
-
-pub fn unrestake_ix(
-    mpsol_amount: u64,
-    unstaker: Pubkey,
-    mpsol_ata: Pubkey,
-    new_ticket_account: Pubkey,
-) -> Instruction {
-    let args = UnrestakeInstructionArgs { mpsol_amount };
-
-    // let now = Local::now();
-    // let ten_days_later = now + chrono::Duration::days(10);
-    // let timestamp = ten_days_later.timestamp() as u64;
-
-    // println!("Timestamp 10 days from now: {}", timestamp);
-
-    // let account_len: usize = (4 + unstaker.to_string().len()) + (4 + MAIN_STATE.to_string().len()) + 8;
-    // let account_len: usize = 100;
-
-    // let state = UnstakeTicket {
-    //     beneficiary: unstaker,
-    //     main_state: MAIN_STATE,
-    //     ticket_sol_value: mpsol_amount,
-    //     ticket_due_timestamp: timestamp
-
-    // };
-
-    // let rent = Rent::get().unwrap();
-    // let rent_lamports = rent.minimum_balance(account_len);
-
-    // let new_ticket_account = Account::new_data(rent_amount, &state, &MP_RESTAKIN_PROGRAM).unwrap();
-
-    // println!("{:?}", state);
-
-    // let pubkey = create_account(
-    //     &unstaker,
-    //     &new_ticket_account.pubkey(),
-    //     rent_lamports,
-    //     100,
-    //     &MP_RESTAKIN_PROGRAM
-    // );
-
-    // let (note_pda_account, bump_seed) = Pubkey::find_program_address(&[note_creator.key.as_ref(), id.as_bytes().as_ref(),], program_id);
-
-    let accounts = vec![
-        AccountMeta::new(MAIN_STATE, false),
-        AccountMeta::new(unstaker, true),
-        AccountMeta::new(mpsol_ata, false),
-        AccountMeta::new(MPSOL_MINT_ADDRESS, false),
-        AccountMeta::new(
-            pubkey!("Gde12qXKF3fALWTAQgzyqBhNE67eBxdmJDLw3EiTu4eu"),
-            false,
-        ),
-        AccountMeta::new(new_ticket_account, true),
-        AccountMeta::new_readonly(TOKEN_PROGRAM_PUBKEY, false),
-        AccountMeta::new_readonly(SYSTEM_PROGRAM_PUBKEY, false),
-    ];
-
-    Instruction::new_with_borsh(
-        MP_RESTAKIN_PROGRAM,
-        &(UNSTAKE_DISCRIMINATOR, args),
-        accounts,
-    )
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]

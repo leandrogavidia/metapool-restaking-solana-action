@@ -1,11 +1,8 @@
 use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS, BSOL_MINT_ADDRESS};
 use errors::ActionError;
-use instructions::{deposit_transaction_msol, restake_ix, unrestake_ix};
-use serde::Serialize;
-use solana_client::rpc_client::RpcClient;
+use instructions::{deposit_ix, restake_ix};
 use solana_sdk::{
-    instruction::Instruction, message::Message, native_token::LAMPORTS_PER_SOL, pubkey::Pubkey,
-    signature::Keypair, signer::Signer, transaction::Transaction,
+    instruction::Instruction, message::Message, native_token::LAMPORTS_PER_SOL, pubkey::Pubkey, transaction::Transaction,
 };
 use spl_associated_token_account::{
     get_associated_token_address, instruction::create_associated_token_account_idempotent,
@@ -30,11 +27,14 @@ pub mod restaking {
 
         let method = ctx.query.method.clone();
         let token = ctx.query.token.clone();
-        let mpsol_ata = get_associated_token_address(&account_pubkey, &MPSOL_MINT_ADDRESS);
-        let amount = (ctx.query.amount * (LAMPORTS_PER_SOL as f32)) as u64;
+        let entry_amount = ctx.query.amount.clone();
+        let lamports_amount = (entry_amount * (LAMPORTS_PER_SOL as f32)) as u64;
+
         let rpc = ctx.env.rpc_url.clone();
+        
+        let mpsol_ata = get_associated_token_address(&account_pubkey, &MPSOL_MINT_ADDRESS);
+        
         let mut instructions: Vec<Instruction> = vec![];
-        let new_ticket_account = Keypair::new();
 
         if method == "restake" {
             let create_mpsol_ata_ix = create_associated_token_account_idempotent(
@@ -53,15 +53,14 @@ pub mod restaking {
                 );
     
                 let msol_ata = get_associated_token_address(&account_pubkey, &MSOL_MINT_ADDRESS);
+                let sol_balance = get_account_balance(&account_pubkey, &rpc).await?;
     
-                let account_balance = get_account_balance(&account_pubkey, &rpc).await?;
-    
-                if account_balance < ctx.query.amount {
+                if sol_balance < entry_amount {
                     return Err(Error::from(ActionError::InsufficientFunds));
                 } else {
-                    let lst_amount = ((ctx.query.amount * 0.2) * (LAMPORTS_PER_SOL as f32)) as u64;
-                    let deposit_ix = deposit_transaction_msol(amount, account_pubkey, msol_ata);
-                    let stake_ix = restake_ix(lst_amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
+                    let msol_amount = ((entry_amount * 0.2) * (LAMPORTS_PER_SOL as f32)) as u64;
+                    let deposit_ix = deposit_ix(lamports_amount, account_pubkey, msol_ata);
+                    let stake_ix = restake_ix(msol_amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
     
                     instructions.extend_from_slice(&[
                         create_msol_ata_ix,
@@ -72,12 +71,12 @@ pub mod restaking {
                 }
             } else if token == "msol" {
                 let msol_ata = get_associated_token_address(&account_pubkey, &MSOL_MINT_ADDRESS);
-                let current_lst_amount = get_token_account_balance(&msol_ata, &rpc).await?;
+                let msol_balance = get_token_account_balance(&msol_ata, &rpc).await?;
 
-                if current_lst_amount < ctx.query.amount {
+                if msol_balance < entry_amount {
                     return Err(Error::from(ActionError::InsufficientFunds));
                 } else {
-                    let stake_ix = restake_ix(amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
+                    let stake_ix = restake_ix(lamports_amount, 2, account_pubkey, msol_ata, mpsol_ata, &token);
 
                     instructions.extend_from_slice(&[
                         create_mpsol_ata_ix,
@@ -86,31 +85,20 @@ pub mod restaking {
                 }
             } else if token == "bsol" {
                 let bsol_ata = get_associated_token_address(&account_pubkey, &BSOL_MINT_ADDRESS);
-                let current_lst_amount = get_token_account_balance(&bsol_ata, &rpc).await?;
+                let bsol_balance = get_token_account_balance(&bsol_ata, &rpc).await?;
 
-                if current_lst_amount < ctx.query.amount {
+                if bsol_balance < entry_amount {
                     return Err(Error::from(ActionError::InsufficientFunds));
                 } else {
-                    let stake_ix = restake_ix(amount, 2, account_pubkey, bsol_ata, mpsol_ata, &token);
+                    let stake_ix = restake_ix(lamports_amount, 2, account_pubkey, bsol_ata, mpsol_ata, &token);
                     instructions.extend_from_slice(&[
                         create_mpsol_ata_ix,
                         stake_ix,
                     ]);
                 }
             }
-
         } else {
-            let current_lst_amount = get_token_account_balance(&mpsol_ata, &rpc).await?;
-            if current_lst_amount < ctx.query.amount {
-                return Err(Error::from(ActionError::InsufficientFunds));
-            } else {
-                instructions.push(unrestake_ix(
-                    amount,
-                    account_pubkey,
-                    mpsol_ata,
-                    new_ticket_account.pubkey(),
-                ));
-            }
+            Err(Error::from(ActionError::InvalidMethod))?
         }
 
         let message = Message::new(&instructions, Some(&account_pubkey));
@@ -148,11 +136,7 @@ pub mod restaking {
             option = {
                 label = "BSOL",
                 value = "bsol"
-            },
-            // option = {
-            //     label = "JitoSOL",
-            //     value = "jitosol"
-            // }
+            }
         },
         parameter = { 
             label = "Method", 
