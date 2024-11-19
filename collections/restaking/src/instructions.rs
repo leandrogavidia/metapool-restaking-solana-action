@@ -3,7 +3,7 @@ use crate::consts::{
     MARINADE_FINANCE_PROGRAM, MARINADE_LIQUID_STAKING_STATE, MARINADE_MSOL_LEG_ACCOUNT,
     MARINADE_MSOL_LEG_AUTHORITY, MARINADE_MSOL_MINT_AUTHORITY, MARINADE_RESERVE_SOL_PDA,
     MARINADE_SOL_LEG_ACCOUNT, MPSOL_MINT_ADDRESS, MPSOL_MINT_AUTHORITY, MP_RESTAKIN_PROGRAM,
-    MSOL_MINT_ADDRESS, MSOL_VAULT_LST_ACCOUNT, MSOL_VAULT_STATE, STAKE_DISCRIMINATOR, VAULT_ATA_PDA_AUTH, BLAZE_STAKE_POOL
+    MSOL_MINT_ADDRESS, MSOL_VAULT_LST_ACCOUNT, MSOL_VAULT_STATE, STAKE_DISCRIMINATOR, VAULT_ATA_PDA_AUTH, BLAZE_STAKE_POOL, JITOSOL_MINT_ADDRESS, JITOSOL_STAKE_POOL, JITOSOL_VAULT_LST_ACCOUNT, JITOSOL_VAULT_STATE
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_sdk::{
@@ -63,24 +63,28 @@ pub fn restake_ix(
     let token_mint_address = match token {
         "sol" | "msol" => MSOL_MINT_ADDRESS,
         "bsol" => BSOL_MINT_ADDRESS,
+        "jito-sol" => JITOSOL_MINT_ADDRESS,
         _ => MSOL_MINT_ADDRESS,
     };
 
     let vault_pubkey = match token {
         "sol" | "msol" => MSOL_VAULT_STATE,
         "bsol" => BSOL_VAULT_STATE,
+        "jito-sol" => JITOSOL_VAULT_STATE,
         _ => MSOL_VAULT_STATE,
     };
 
     let vault_lst_account = match token {
         "sol" | "msol" => MSOL_VAULT_LST_ACCOUNT,
         "bsol" => BSOL_VAULT_LST_ACCOUNT,
+        "jito-sol" => JITOSOL_VAULT_LST_ACCOUNT,
         _ => MSOL_VAULT_LST_ACCOUNT,
     };
 
     let lst_pool = match token {
         "sol" | "msol" => MARINADE_LIQUID_STAKING_STATE,
         "bsol" => BLAZE_STAKE_POOL,
+        "jito-sol" => JITOSOL_STAKE_POOL,
         _ => MARINADE_LIQUID_STAKING_STATE
     };
 

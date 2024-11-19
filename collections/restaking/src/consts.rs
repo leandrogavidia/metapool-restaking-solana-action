@@ -20,6 +20,7 @@ pub const MARINADE_FINANCE_PROGRAM: Pubkey = pubkey!("MarBmsSgKXdrN1egZf5sqe1TMa
 
 // # Metapool restaking program
 
+pub const MP_RESTAKIN_PROGRAM: Pubkey = pubkey!("MPSoLoEnfNRFReRZSVH2V8AffSmWSR4dVoBLFm1YpAW");
 pub const MAIN_STATE: Pubkey = pubkey!("mpsoLeuCF3LwrJWbzxNd81xRafePFfPhsNvGsAMhUAA");
 pub const VAULT_ATA_PDA_AUTH: Pubkey = pubkey!("6frWEHsiEc2RscCmPRGMq3DH54QR1FHrw1fqFHQD51d4");
 
@@ -40,5 +41,12 @@ pub const BLAZE_STAKE_POOL: Pubkey = pubkey!("stk9ApL5HeVAwPLr3TLhDXdZS8ptVu7zp6
 // ## mpSOL
 
 pub const MPSOL_MINT_ADDRESS: Pubkey = pubkey!("mPsoLV53uAGXnPJw63W91t2VDqCVZcU5rTh3PWzxnLr");
-pub const MP_RESTAKIN_PROGRAM: Pubkey = pubkey!("MPSoLoEnfNRFReRZSVH2V8AffSmWSR4dVoBLFm1YpAW");
 pub const MPSOL_MINT_AUTHORITY: Pubkey = pubkey!("2nGwwzMPEaTPEaRHVFjVojHJeB8uaWnTMRCN22zrQWSL");
+
+// ## JitoSOL
+
+pub const JITOSOL_MINT_ADDRESS: Pubkey = pubkey!("J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn");
+pub const JITOSOL_VAULT_STATE: Pubkey = pubkey!("8cj9nzY17H8MyxG8HbgfEYWsDz2vmCjev5fScJYDevG");
+pub const JITOSOL_VAULT_LST_ACCOUNT: Pubkey = pubkey!("EG6FNAK2Qv52996Ej1YrTrBZxkZvTnErLzXVhTyusetH");
+pub const JITOSOL_STAKE_POOL: Pubkey = pubkey!("Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb");
+

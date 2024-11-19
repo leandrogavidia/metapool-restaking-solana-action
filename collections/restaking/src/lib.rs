@@ -1,4 +1,4 @@
-use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS, BSOL_MINT_ADDRESS};
+use consts::{MPSOL_MINT_ADDRESS, MSOL_MINT_ADDRESS, BSOL_MINT_ADDRESS, JITOSOL_MINT_ADDRESS};
 use errors::ActionError;
 use instructions::{deposit_ix, restake_ix};
 use solana_sdk::{
@@ -96,6 +96,19 @@ pub mod restaking {
                         stake_ix,
                     ]);
                 }
+            } else if token == "jito-sol" {
+                let jitosol_ata = get_associated_token_address(&account_pubkey, &JITOSOL_MINT_ADDRESS);
+                let jitosol_balance = get_token_account_balance(&jitosol_ata, &rpc).await?;
+
+                if jitosol_balance < entry_amount {
+                    return Err(Error::from(ActionError::InsufficientFunds));
+                } else {
+                    let stake_ix = restake_ix(lamports_amount, 2, account_pubkey, jitosol_ata, mpsol_ata, &token);
+                    instructions.extend_from_slice(&[
+                        create_mpsol_ata_ix,
+                        stake_ix,
+                    ]);
+                }
             }
         } else {
             Err(Error::from(ActionError::InvalidMethod))?
@@ -136,6 +149,10 @@ pub mod restaking {
             option = {
                 label = "BSOL",
                 value = "bsol"
+            },
+            option = {
+                label = "JitoSOL",
+                value = "jito-sol"
             }
         },
         parameter = { 
