@@ -18,7 +18,7 @@ pub const MARINADE_FINANCE_PROGRAM: Pubkey = pubkey!("MarBmsSgKXdrN1egZf5sqe1TMa
 // pub const REFERRAL_STATE: Pubkey = pubkey!("GL3wosUhC6u4bEvHrWhbig1QAXsXnWaGYxkHxbjptfom");
 // pub const MSOL_TOKEN_PARTNER_ACCOUNT: Pubkey = pubkey!("HjLKRFDp3Y7fJ36MxgdeNnxfKFjsVRNb4dQ2adc5ymTW");
 
-// # Metapool restaking program
+// # Meta Pool restaking program
 
 pub const MP_RESTAKIN_PROGRAM: Pubkey = pubkey!("MPSoLoEnfNRFReRZSVH2V8AffSmWSR4dVoBLFm1YpAW");
 pub const MAIN_STATE: Pubkey = pubkey!("mpsoLeuCF3LwrJWbzxNd81xRafePFfPhsNvGsAMhUAA");
