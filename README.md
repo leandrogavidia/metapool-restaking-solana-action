@@ -2,6 +2,8 @@
 
 This is a Solana Action that renders a Blink for the Solana network. This Blink allows you to restake your LST tokens to mpSOL, like to the process on the [official Meta Pool website](https://www.metapool.app/es/restake/).
 
+<img width="954" height="1671" alt="image" src="https://github.com/user-attachments/assets/ec4ec770-8192-4dc1-b3db-e3f0620d7602" />
+
 
 ## What mpSOL is?
 
